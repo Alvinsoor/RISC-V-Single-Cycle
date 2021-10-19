@@ -37,8 +37,8 @@ localparam SRL = 4'b0110;
 		case (ALU_Operation_i)
 		ADD: //addi y add
 			ALU_Result_o = A_i + B_i;
-		//SUB: //sub
-			//ALU_Result_o = A_i - B_i;
+		SUB: //sub
+			ALU_Result_o = A_i - B_i;
 		LUI: // lui
 			ALU_Result_o = {B_i[19:0],12'b0};
 		OR: 	//	ori

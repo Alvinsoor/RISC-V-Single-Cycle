@@ -29,8 +29,7 @@ localparam U_Type_LUI		= 7'bx_010_xxx;
 localparam I_Type_OR			= 7'bx_001_110;
 localparam I_Type_SLL		= 7'b0_001_001;
 localparam I_Type_SRL		= 7'b0_001_101;
-
-//localparam R_Type_SUB		= 7'b1_000_000;
+localparam R_Type_SUB		= 7'b1_000_000;
 
 reg [3:0] alu_control_values;
 wire [6:0] selector;
@@ -45,7 +44,7 @@ always@(selector)begin
 		I_Type_OR:		alu_control_values = 4'b0010;
 		I_Type_SLL: 	alu_control_values = 4'b0101;
 		I_Type_SRL: 	alu_control_values = 4'b0110;
-		//R_Type_SUB:		alu_control_values = 4'b0001;
+		R_Type_SUB:		alu_control_values = 4'b0001;
 	
 
 		default: alu_control_values = 4'b11_11;
