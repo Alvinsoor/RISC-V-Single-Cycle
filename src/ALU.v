@@ -45,6 +45,9 @@ localparam SRL = 4'b0110;
 		   ALU_Result_o = A_i|B_i;
 		SLL:
 			ALU_Result_o = A_i << B_i;
+		SRL:
+			ALU_Result_o = A_i >> B_i;
+		
 		
 		
 	
