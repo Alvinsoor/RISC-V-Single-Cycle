@@ -28,7 +28,7 @@ always@(op_i or Instruction_bus_i) begin
 	else if (op_i == 7'h37)
 		Immediate_o = {{12{Instruction_bus_i[31]}},Instruction_bus_i[31:12]};// U format
 	else
-		Immediate_o = 0;
+		Immediate_o = 0;	// R format
 		
 end
 
