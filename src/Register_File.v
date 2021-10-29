@@ -75,6 +75,9 @@ Register_ra
 
 	
 Register
+#(
+	.init_val(256)
+	)
 Register_sp
 (
 	.clk(clk),

@@ -29,13 +29,17 @@ localparam LUI = 4'b0100;
 localparam OR	= 4'b0010;
 localparam SLL = 4'b0101;
 localparam SRL = 4'b0110;
+localparam AND = 4'b0011;
+localparam XOR	= 4'b0111;
 
-
-   
+localparam BEQ	= 4'b1000;
+localparam BNE	= 4'b1001;
+localparam BLT	= 4'b1010;
+  
    always @ (A_i or B_i or ALU_Operation_i)
      begin
 		case (ALU_Operation_i)
-		ADD: //addi y add
+		ADD: //addi, add, JALR, Sw, Lw
 			ALU_Result_o = A_i + B_i;
 		SUB: //sub
 			ALU_Result_o = A_i - B_i;
@@ -47,15 +51,25 @@ localparam SRL = 4'b0110;
 			ALU_Result_o = A_i << B_i;
 		SRL:
 			ALU_Result_o = A_i >> B_i;
+		AND: //and y andi
+			ALU_Result_o = A_i & B_i;
+		XOR:
+			ALU_Result_o = A_i ^ B_i;
+			
+		BEQ:
+			ALU_Result_o[0] = (A_i == B_i)? 1'b1:1'b0;
+		BNE:
+			ALU_Result_o[0] = (A_i != B_i)? 1'b1:1'b0;
+		BLT:
+			ALU_Result_o[0] = (A_i < B_i)? 1'b1:1'b0;
 		
-		
-		
+
 	
 		default:
 			ALU_Result_o = 0;
 		endcase // case(control)
 		
-		Zero_o = (ALU_Result_o == 0) ? 1'b1 : 1'b0;
+		Zero_o = (ALU_Result_o == 0) ? 1'b1 : 1'b0; //Para el branch
 		
      end // always @ (A or B or control)
 endmodule // ALU

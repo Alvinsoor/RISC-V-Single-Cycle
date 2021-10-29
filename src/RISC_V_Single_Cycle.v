@@ -20,7 +20,7 @@
 module RISC_V_Single_Cycle
 #(
 	parameter PROGRAM_MEMORY_DEPTH = 64,
-	parameter DATA_MEMORY_DEPTH = 128
+	parameter DATA_MEMORY_DEPTH = 256
 )
 
 (
@@ -42,11 +42,26 @@ wire reg_write_w;
 wire mem_to_reg_w;
 wire mem_write_w;
 wire mem_read_w;
+wire branch_o_w;
 wire [2:0] alu_op_w;
 
 /** Program Counter**/
 wire [31:0] pc_plus_4_w;
 wire [31:0] pc_w;
+
+//Mux Jump
+wire [31:0] pc_jalr_signal_w;
+wire [31:0] pc_MUX_JALR_w;
+
+wire [31:0] pc_jal_signal_w;
+wire [31:0] pc_MUX_JAL_w;
+
+//Mux Branch
+wire [31:0] pc_MUX_BRN_w;
+
+
+//Adder PC Plus INMM
+wire [31:0] pc_plus_INMM_w;
 
 
 /**Register File**/
@@ -68,6 +83,13 @@ wire [3:0] alu_operation_w;
 /**Instruction Bus**/	
 wire [31:0] instruction_bus_w;
 
+//Data memory
+wire [31:0]read_data_memory_w;
+
+//OR Gate jal,jalr
+wire 	[31:0]Or_Gate_output_w;
+//MUX Mem To Reg
+wire [31:0]Output_mem_to_reg_w;
 
 //******************************************************************/
 //******************************************************************/
@@ -85,7 +107,10 @@ CONTROL_UNIT
 	.Reg_Write_o(reg_write_w),
 	.Mem_to_Reg_o(mem_to_reg_w),
 	.Mem_Read_o(mem_read_w),
-	.Mem_Write_o(mem_write_w)
+	.Mem_Write_o(mem_write_w),
+	.Branch_o(branch_o_w),
+	.JALR_Signal(pc_jalr_signal_w),
+	.JAL_Signal(pc_jal_signal_w)
 );
 
 
@@ -94,7 +119,7 @@ PROGRAM_COUNTER
 (
 	.clk(clk),
 	.reset(reset),
-	.Next_PC(pc_plus_4_w),
+	.Next_PC(pc_MUX_JALR_w),
 	.PC_Value(pc_w)
 );
 
@@ -109,6 +134,21 @@ PROGRAM_MEMORY
 	.Instruction_o(instruction_bus_w)
 );
 
+Data_Memory
+#(
+	.MEMORY_DEPTH(DATA_MEMORY_DEPTH)
+)
+Data_Memory
+(
+	.clk(clk),
+	.Mem_Write_i(mem_write_w),
+	.Mem_Read_i(mem_read_w),
+	.Write_Data_i(read_data_2_w),
+	.Address_i(alu_result_w),
+
+	.Read_Data_o(read_data_memory_w)
+);
+
 
 Adder_32_Bits
 PC_PLUS_4
@@ -118,6 +158,16 @@ PC_PLUS_4
 	
 	.Result(pc_plus_4_w)
 );
+
+Adder_32_Bits
+PC_PLUS_INMM
+(
+	.Data0(pc_w),
+	.Data1(inmmediate_data_w),
+	
+	.Result(pc_plus_INMM_w)
+);
+
 
 
 //******************************************************************/
@@ -143,6 +193,19 @@ REGISTER_FILE_UNIT
 
 );
 
+Multiplexer_2_to_1
+#(
+	.NBits(32)
+)
+MUX_Mem_To_Reg
+(
+	.Selector_i(mem_to_reg_w),
+	.Mux_Data_0_i(alu_result_w),
+	.Mux_Data_1_i(read_data_memory_w),
+	
+	.Mux_Output_o(Output_mem_to_reg_w)
+
+);
 
 
 Immediate_Unit
@@ -166,6 +229,71 @@ MUX_DATA_OR_IMM_FOR_ALU
 	
 	.Mux_Output_o(read_data_2_or_imm_w)
 
+);
+
+Multiplexer_2_to_1
+#(
+	.NBits(32)
+)
+MUX_PC_JALR_OR_NEXT
+(
+	.Selector_i(pc_jalr_signal_w),
+	.Mux_Data_0_i(pc_MUX_JAL_w),
+	.Mux_Data_1_i(alu_result_w),
+	
+	.Mux_Output_o(pc_MUX_JALR_w)
+
+);
+
+Multiplexer_2_to_1
+#(
+	.NBits(32)
+)
+MUX_PC_BRANCH_OR_NEXT
+(
+	.Selector_i(alu_result_w[0]),
+	.Mux_Data_0_i(pc_plus_INMM_w),
+	.Mux_Data_1_i(pc_plus_4_w),
+	
+	.Mux_Output_o(pc_MUX_BRN_w)
+
+);
+
+Multiplexer_2_to_1
+#(
+	.NBits(32)
+)
+MUX_PC_JAL_OR_NEXT
+(
+	.Selector_i(pc_jal_signal_w),
+	.Mux_Data_0_i(pc_plus_INMM_w),
+	.Mux_Data_1_i(pc_MUX_BRN_w),
+	
+	.Mux_Output_o(pc_MUX_JAL_w)
+
+);
+
+Multiplexer_2_to_1
+#(
+	.NBits(32)
+)
+MUX_PC_OR_MemeToReg
+(
+	.Selector_i(Or_Gate_output_w),
+	.Mux_Data_0_i(pc_plus_INMM_w),
+	.Mux_Data_1_i(pc_plus_4_w),
+	
+	.Mux_Output_o(Output_mem_to_reg_w)
+
+);
+
+OrGate
+OR_Gate_Jal_Jalr
+(
+	.A_i(pc_jalr_signal_w),
+	.B_i(pc_jal_signal_w),
+
+	.result(Or_Gate_output_w)
 );
 
 

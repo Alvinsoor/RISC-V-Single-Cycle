@@ -22,7 +22,9 @@ module Control
 	output Mem_Write_o,
 	output ALU_Src_o,
 	output Reg_Write_o,
-	output [2:0]ALU_Op_o
+	output [2:0]ALU_Op_o,
+	output JALR_Signal,
+	output JAL_Signal
 );
 
 
@@ -30,19 +32,35 @@ module Control
 localparam R_Type				= 7'h33;
 localparam I_Type_LOGIC		= 7'h13;
 localparam U_Type_LUI		= 7'h37;
+localparam I_Type_LW			= 7'h03;
+localparam I_Type_JMP		= 7'h67;
+localparam S_Type 			= 7'h23;//SW
+localparam B_Type 			= 7'h63;//Branches
+localparam J_Type 			= 7'h6F;//JAL
 
 
-reg [8:0] control_values;
+reg [10:0] control_values;
+//reg jalr;
 
 always@(OP_i) begin
-	case(OP_i)//                          876_54_3_210
-		R_Type:			control_values = 9'b001_00_0_000;
-		I_Type_LOGIC:	control_values = 9'b001_00_1_001;
-		U_Type_LUI:		control_values = 9'b001_00_1_010;
-
+	case(OP_i)//                           9_876_54_3_210 Los ultimos 3 bits son para identificar la operación (asignados)
+		R_Type:			control_values = 11'b00_001_00_0_000;
+		I_Type_LOGIC:	control_values = 11'b00_001_00_1_001;
+		U_Type_LUI:		control_values = 11'b00_001_00_1_010;
+		I_Type_JMP:		control_values = 11'b01_001_00_1_011;//Configuracion JALR
+		B_Type:			control_values = 11'b00_100_00_0_100;//Branches
+		I_Type_LW:		control_values = 11'b00_011_10_1_101;//LW
+		S_Type:			control_values = 11'b00_010_01_1_110;//SW
+		J_Type:			control_values = 11'b10_101_01_0_111;//JAL
+		
+		
+		
 		default:
-			control_values= 9'b000_00_000;
+			control_values= 11'b00_000_00_000;
+			
 		endcase
+	
+	
 end	
 
 assign Branch_o = control_values[8];
@@ -58,6 +76,10 @@ assign Mem_Write_o = control_values[4];
 assign ALU_Src_o = control_values[3];
 
 assign ALU_Op_o = control_values[2:0];	
+
+assign JALR_Signal = control_values[9];
+
+assign JAL_Signal = control_values[10];
 
 endmodule
 

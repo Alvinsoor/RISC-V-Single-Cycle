@@ -11,8 +11,8 @@
 ******************************************************************/
 
 module Data_Memory 
-#(	parameter DATA_WIDTH = 8,
-	parameter MEMORY_DEPTH = 1024
+#(	parameter DATA_WIDTH = 32,
+	parameter MEMORY_DEPTH = 256
 
 )
 (
@@ -20,7 +20,7 @@ module Data_Memory
 	input Mem_Write_i,
 	input Mem_Read_i,
 	input [DATA_WIDTH-1:0] Write_Data_i,
-	input [DATA_WIDTH-1:0]  Address_i,
+	input [DATA_WIDTH-1:0] Address_i,
 
 	output  [DATA_WIDTH-1:0]  Read_Data_o
 );
