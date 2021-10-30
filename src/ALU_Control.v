@@ -29,7 +29,7 @@ localparam I_Type_ADDI		= 7'bx_001_000; 		//Func7_Alu0p_Func3
 localparam U_Type_LUI		= 7'bx_010_xxx;		//La Alu op son los ultimos 3 bits de control values en Control Unit
 
 localparam I_Type_ORI		= 7'bx_001_110;
-localparam R_Type_OR			= 7'b0_000_110;
+localparam R_Type_OR		= 7'b0_000_110;
 
 localparam R_Type_SLL		= 7'b0_000_001;
 localparam I_Type_SLLI		= 7'bx_001_001;
@@ -52,11 +52,11 @@ localparam B_Type_BEQ		= 7'bx_100_000;
 localparam B_Type_BNE		= 7'bx_100_001;
 localparam B_Type_BLT		= 7'bx_100_100;
 
-localparam S_Type_SW			= 7'bx_110_010;
+localparam S_Type_SW		= 7'bx_110_010;
 
-localparam I_Type_LW			= 7'bx_101_010;
+localparam I_Type_LW		= 7'bx_101_010;
 
-//localparam J_Type				= 7'bx_111_000;
+//localparam J_Type			= 7'bx_111_000;
 
 
 
