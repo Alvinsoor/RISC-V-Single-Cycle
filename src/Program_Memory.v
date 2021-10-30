@@ -31,7 +31,7 @@ assign real_address = {2'b0, Address_i[16:2]};
 
 	initial
 	begin
-		$readmemh("C:/PROJECTS/Risc_V_Single_Cycle/RISC-V-Single-Cycle-main/src/program.dat", rom);
+		$readmemh("W:/Coding/separate branch/RISC-V-Single-Cycle/src/torres.dat", rom);
 	end
 
 	always @ (real_address)

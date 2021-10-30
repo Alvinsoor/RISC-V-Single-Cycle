@@ -76,7 +76,7 @@ Register_ra
 	
 Register
 #(
-	.init_val(256)
+	.init_val(32'h100103FC)
 	)
 Register_sp
 (

@@ -50,10 +50,10 @@ wire [31:0] pc_plus_4_w;
 wire [31:0] pc_w;
 
 //Mux Jump
-wire [31:0] pc_jalr_signal_w;
+wire pc_jalr_signal_w;
 wire [31:0] pc_MUX_JALR_w;
 
-wire [31:0] pc_jal_signal_w;
+wire pc_jal_signal_w;
 wire [31:0] pc_MUX_JAL_w;
 
 //Mux Branch
@@ -91,6 +91,10 @@ wire 	[31:0]Or_Gate_output_w;
 //MUX Mem To Reg
 wire [31:0]Output_mem_to_reg_w;
 
+wire [31:0]Output_Mux_Memtoreg_w;
+//And Gate Alu Branch
+wire	And_Gate_output_w;
+
 //******************************************************************/
 //******************************************************************/
 //******************************************************************/
@@ -113,7 +117,7 @@ CONTROL_UNIT
 	.JAL_Signal(pc_jal_signal_w)
 );
 
-
+//******************************************************************/
 PC_Register
 PROGRAM_COUNTER
 (
@@ -122,7 +126,7 @@ PROGRAM_COUNTER
 	.Next_PC(pc_MUX_JALR_w),
 	.PC_Value(pc_w)
 );
-
+//******************************************************************/
 
 Program_Memory
 #(
@@ -133,6 +137,8 @@ PROGRAM_MEMORY
 	.Address_i(pc_w),
 	.Instruction_o(instruction_bus_w)
 );
+
+//******************************************************************/
 
 Data_Memory
 #(
@@ -149,7 +155,7 @@ Data_Memory
 	.Read_Data_o(read_data_memory_w)
 );
 
-
+//******************************************************************/
 Adder_32_Bits
 PC_PLUS_4
 (
@@ -158,7 +164,7 @@ PC_PLUS_4
 	
 	.Result(pc_plus_4_w)
 );
-
+//******************************************************************/
 Adder_32_Bits
 PC_PLUS_INMM
 (
@@ -187,11 +193,12 @@ REGISTER_FILE_UNIT
 	.Write_Register_i(instruction_bus_w[11:7]),
 	.Read_Register_1_i(instruction_bus_w[19:15]),
 	.Read_Register_2_i(instruction_bus_w[24:20]),
-	.Write_Data_i(alu_result_w),
+	.Write_Data_i(Output_Mux_Memtoreg_w),
 	.Read_Data_1_o(read_data_1_w),
 	.Read_Data_2_o(read_data_2_w)
 
 );
+//******************************************************************/
 
 Multiplexer_2_to_1
 #(
@@ -206,7 +213,7 @@ MUX_Mem_To_Reg
 	.Mux_Output_o(Output_mem_to_reg_w)
 
 );
-
+//******************************************************************/
 
 Immediate_Unit
 IMM_UNIT
@@ -216,6 +223,7 @@ IMM_UNIT
 );
 
 
+//******************************************************************/
 
 Multiplexer_2_to_1
 #(
@@ -231,6 +239,7 @@ MUX_DATA_OR_IMM_FOR_ALU
 
 );
 
+//******************************************************************/
 Multiplexer_2_to_1
 #(
 	.NBits(32)
@@ -244,6 +253,7 @@ MUX_PC_JALR_OR_NEXT
 	.Mux_Output_o(pc_MUX_JALR_w)
 
 );
+//******************************************************************/
 
 Multiplexer_2_to_1
 #(
@@ -251,14 +261,15 @@ Multiplexer_2_to_1
 )
 MUX_PC_BRANCH_OR_NEXT
 (
-	.Selector_i(alu_result_w[0]),
-	.Mux_Data_0_i(pc_plus_INMM_w),
-	.Mux_Data_1_i(pc_plus_4_w),
+	.Selector_i(And_Gate_output_w),
+	.Mux_Data_0_i(pc_plus_4_w),
+	.Mux_Data_1_i(pc_plus_INMM_w),
 	
 	.Mux_Output_o(pc_MUX_BRN_w)
 
 );
 
+//******************************************************************/
 Multiplexer_2_to_1
 #(
 	.NBits(32)
@@ -266,12 +277,13 @@ Multiplexer_2_to_1
 MUX_PC_JAL_OR_NEXT
 (
 	.Selector_i(pc_jal_signal_w),
-	.Mux_Data_0_i(pc_plus_INMM_w),
-	.Mux_Data_1_i(pc_MUX_BRN_w),
+	.Mux_Data_0_i(pc_MUX_BRN_w),
+	.Mux_Data_1_i(pc_plus_INMM_w),
 	
 	.Mux_Output_o(pc_MUX_JAL_w)
 
 );
+//******************************************************************/
 
 Multiplexer_2_to_1
 #(
@@ -280,13 +292,14 @@ Multiplexer_2_to_1
 MUX_PC_OR_MemeToReg
 (
 	.Selector_i(Or_Gate_output_w),
-	.Mux_Data_0_i(pc_plus_INMM_w),
+	.Mux_Data_0_i(Output_mem_to_reg_w),
 	.Mux_Data_1_i(pc_plus_4_w),
 	
-	.Mux_Output_o(Output_mem_to_reg_w)
+	.Mux_Output_o(Output_Mux_Memtoreg_w)
 
 );
 
+//******************************************************************/
 OrGate
 OR_Gate_Jal_Jalr
 (
@@ -295,7 +308,17 @@ OR_Gate_Jal_Jalr
 
 	.result(Or_Gate_output_w)
 );
+//******************************************************************/
 
+And_Gate
+And_Gate_Alu_BRN
+(
+	.A_i(branch_o_w),
+	.B_i(alu_result_w[0]),
+
+	.result(And_Gate_output_w)
+);
+//******************************************************************/
 
 ALU_Control
 ALU_CONTROL_UNIT
@@ -307,7 +330,7 @@ ALU_CONTROL_UNIT
 
 );
 
-
+//******************************************************************/
 
 ALU
 ALU_UNIT
