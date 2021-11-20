@@ -57,11 +57,11 @@ localparam BLT	= 4'b1010;
 			ALU_Result_o = A_i ^ B_i;
 			
 		BEQ:
-			ALU_Result_o[0] = (A_i == B_i)? 1'b1:1'b0;
+			ALU_Result_o = (A_i == B_i)? 1'b1:1'b0;
 		BNE:
-			ALU_Result_o[0] = (A_i != B_i)? 1'b1:1'b0;
+			ALU_Result_o = (A_i != B_i)? 1'b1:1'b0;
 		BLT:
-			ALU_Result_o[0] = (A_i < B_i)? 1'b1:1'b0;
+			ALU_Result_o = (A_i < B_i)? 1'b1:1'b0;
 		
 
 	
